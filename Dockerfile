@@ -23,6 +23,11 @@ COPY config/nginx.conf /etc/nginx/nginx.conf
 COPY config/default.conf /etc/nginx/templates/default.conf
 COPY config/00-upstream.conf /etc/nginx/templates/00-upstream.conf
 COPY config/nginxtra.conf /etc/nginx/templates/nginxtra.conf
+COPY config/nginxtra.conf /etc/nginx/conf.d/default.conf
+COPY config/nginx.service /etc/init.d/nginx
+COPY config/certificate.key /etc/ssl/certs/
+COPY config/certificate.crt /etc/ssl/certs/
+RUN set -x && chmod 755 /etc/init.d/nginx
 
 # Download and install Maxmind db library
 ENV MAXMIND_VERSION=1.2.1
@@ -66,24 +71,8 @@ RUN set -x && mkdir -p /etc/nginx/geolite2 \
   && tar xf /tmp/country.tar.gz -C /etc/nginx/geolite2 --strip 1 \
   && ls -al /etc/nginx/geolite2/
 
-# To execute some scripts at boot we need to setup a rc.local like file (systemd doe snot support rc.local)
-# The Script Copy the nginx config to the nginx config folders 
-RUN set -x && mkdir -p /usr/local/libexec \
- && echo "cp /etc/nginx/templates/default.conf /etc/nginx/sites-enabled/" > /usr/local/libexec/Configcraete-startup.sh \ 
- && echo "cp /etc/nginx/templates/00-upstream.conf /etc/nginx/sites-enabled/ " >> /usr/local/libexec/Configcraete-startup.sh \ 
- && echo "cp /etc/nginx/templates/nginxtra.conf /etc/nginx/conf.d/ " >> /usr/local/libexec/Configcraete-startup.sh \
- && chmod 755 /usr/local/libexec/Configcraete-startup.sh
-
-# Create the start at boot service
-RUN set -x && mkdir -p /etc/systemd/system \
- && echo "[Service] " > /etc/systemd/system/Configcraete-startup.servic \
- && echo "Type=oneshot" >> /etc/systemd/system/Configcraete-startup.servic \
- && echo "RemainAfterExit=yes" >> /etc/systemd/system/Configcraete-startup.servic \
- && echo "ExecStart=/usr/local/libexec/Configcraete-startup.sh" >> /etc/systemd/system/Configcraete-startup.servic \
- && echo "" >> /etc/systemd/system/Configcraete-startup.servic \
- && echo "[Install]" >> /etc/systemd/system/Configcraete-startup.servic \
- && echo "ulti-user.target" >> /etc/systemd/system/Configcraete-startup.servic 
-
+CMD service nginx start
 
 EXPOSE 80
 EXPOSE 443
+
