@@ -22,7 +22,7 @@ When you start this container as-is
 
 That's it.
 
-## I do not want to prxy Google.com, what should I do?
+## I do not want to proxy Google.com, what should I do?
 
 Make some volumes:
 - For the certificate use: /etc/ssl/certs/
