@@ -35,6 +35,15 @@ cp -n /etc/nginx/templates/default.conf /etc/nginx/sites-enabled/
 cp -n /etc/nginx/templates/00-upstream.conf /etc/nginx/sites-enabled/
 cp -n /etc/nginx/templates/nginxtra.conf /etc/nginx/conf.d/default.conf
 
+cat << EOF
+ __        __                         _                       _       ___   _____
+ \ \      / /   __ _    __ _   _ __  | |   __ _   _ __     __| |     |_ _| |_   _|
+  \ \ /\ / /   / _  |  / _  | |  __| | |  / _  | |  _ \   / _  |      | |    | |
+   \ V  V /   | (_| | | (_| | | |    | | | (_| | | | | | | (_| |  _   | |    | |
+    \_/\_/     \__,_|  \__,_| |_|    |_|  \__,_| |_| |_|  \__,_| (_) |___|   |_|
+                               by Ron Pool 2019
+EOF
+
 [ -x $DAEMON ] || exit 0
 
 DAEMON_ARGS="-c $CONFFILE $DAEMON_ARGS"
