@@ -15,14 +15,16 @@ RUN set -x && DEBIAN_FRONTEND=noninteractive apt-get update \
     unzip
 
 # The actual nginx server config, this needs to get loaded last.
-# Make sure you copy it to default.conf to overwrite the normal config!
+# We move the default config files to a template folder
+# On boot we check if the files exist and if not we copy the files from the templates to the nginx config folders
+# In this way you kan map volumes to your host server and maintain the config files
 RUN set -x && mkdir -p /etc/nginx/sites-enabled
 COPY config/nginx.conf /etc/nginx/nginx.conf
 COPY config/default.conf /etc/nginx/templates/default.conf
 COPY config/00-upstream.conf /etc/nginx/templates/00-upstream.conf
 COPY config/nginxtra.conf /etc/nginx/templates/nginxtra.conf
 
-# Install Maxmind db library
+# Download and install Maxmind db library
 ENV MAXMIND_VERSION=1.2.1
 RUN set -x \
   && wget https://github.com/maxmind/libmaxminddb/releases/download/${MAXMIND_VERSION}/libmaxminddb-${MAXMIND_VERSION}.tar.gz \
@@ -56,22 +58,23 @@ RUN set -x \
     build-essential \
     dpkg-dev
 
-# Download Maxmind db version 2
+# Download the Maxmind db version 2
 # This example uses the free version from https://dev.maxmind.com/geoip/geoip2/geolite2/
-#
 # We only use the country db, you can add the city db and others if you want them.
 RUN set -x && mkdir -p /etc/nginx/geolite2 \
   && wget -O /tmp/country.tar.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz \
   && tar xf /tmp/country.tar.gz -C /etc/nginx/geolite2 --strip 1 \
   && ls -al /etc/nginx/geolite2/
 
+# To execute some scripts at boot we need to setup a rc.local like file (systemd doe snot support rc.local)
+# The Script Copy the nginx config to the nginx config folders 
 RUN set -x && mkdir -p /usr/local/libexec \
  && echo "cp /etc/nginx/templates/default.conf /etc/nginx/sites-enabled/" > /usr/local/libexec/Configcraete-startup.sh \ 
  && echo "cp /etc/nginx/templates/00-upstream.conf /etc/nginx/sites-enabled/ " >> /usr/local/libexec/Configcraete-startup.sh \ 
- && echo "cp /etc/nginx/templates/nginxtra.conf /etc/nginx/conf.d/ " >> /usr/local/libexec/Configcraete-startup.sh
+ && echo "cp /etc/nginx/templates/nginxtra.conf /etc/nginx/conf.d/ " >> /usr/local/libexec/Configcraete-startup.sh \
+ && chmod 755 /usr/local/libexec/Configcraete-startup.sh
 
-RUN set -x && chmod 755 /usr/local/libexec/Configcraete-startup.sh
-
+# Create the start at boot service
 RUN set -x && mkdir -p /etc/systemd/system \
  && echo "[Service] " > /etc/systemd/system/Configcraete-startup.servic \
  && echo "Type=oneshot" >> /etc/systemd/system/Configcraete-startup.servic \
