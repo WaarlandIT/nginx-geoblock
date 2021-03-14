@@ -29,6 +29,8 @@ Make some volumes:
   - The certificate used is called "certificate.crt"
   - The keyfile used is called "certificate.key"
 
+The certificate and key file are dummy files you need to replace.
+
 - For the country allow list config use: /etc/nginx/conf.d/
   - Some default config will be placed there when the container starts first, you will get how it works
 
